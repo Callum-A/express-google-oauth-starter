@@ -3,6 +3,7 @@ import RouteHandler from './base';
 import UserRepository from '../repositories/user';
 import OAuthService from '../services/oauth';
 import jwt from 'jsonwebtoken';
+import JWTService from '../services/jwt';
 
 interface GoogleOAuthRequest extends Request {
     query: {
@@ -29,10 +30,16 @@ interface GoogleUserDetails {
 class UserRoutesHandler implements RouteHandler {
     userRepository: UserRepository;
     oAuthService: OAuthService;
+    jwtService: JWTService;
 
-    constructor(userRepository: UserRepository, oAuthService: OAuthService) {
+    constructor(
+        userRepository: UserRepository,
+        oAuthService: OAuthService,
+        jwtService: JWTService
+    ) {
         this.userRepository = userRepository;
         this.oAuthService = oAuthService;
+        this.jwtService = jwtService;
     }
 
     async googleOAuth(req: GoogleOAuthRequest, res: Response) {
@@ -48,7 +55,23 @@ class UserRoutesHandler implements RouteHandler {
                 userDetails.email
             );
         }
-        res.status(200).json({ user });
+        const accessToken = this.jwtService.sign(
+            {
+                email: user.email,
+                name: user.name,
+                publicId: user.publicId,
+            },
+            3600 // an hour
+        );
+        const refreshToken = this.jwtService.sign(
+            {
+                email: user.email,
+                name: user.name,
+                publicId: user.publicId,
+            },
+            3600 * 24 // a day
+        );
+        res.status(200).json({ accessToken, refreshToken, user });
     }
 
     async getUserByPublicId(req: Request, res: Response) {
@@ -63,10 +86,30 @@ class UserRoutesHandler implements RouteHandler {
         res.send(user);
     }
 
+    async whoAmI(req: Request, res: Response) {
+        if (!req.user) {
+            // Unreachable code
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        const user = await this.userRepository.findByPublicId(
+            req.user.publicId
+        );
+        if (!user) {
+            // Unreachable code
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        res.send(user);
+    }
+
     getRouter(): Router {
         const router = Router();
         router.get('/:publicId', this.getUserByPublicId.bind(this));
         router.get('/oauth/google', this.googleOAuth.bind(this));
+        router.get('/protected/whoami', this.whoAmI.bind(this));
         return router;
     }
 }

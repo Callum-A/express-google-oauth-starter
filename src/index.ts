@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import UserRepository from './repositories/user';
 import UserRoutesHandler from './routes/user';
 import OAuthService from './services/oauth';
+import JWTService from './services/jwt';
 
 const main = async () => {
     dotenv.config();
@@ -18,7 +19,15 @@ const main = async () => {
         process.env.GOOGLE_CLIENT_SECRET || '',
         process.env.GOOGLE_REDIRECT_URL || ''
     );
-    const USER_HANDLER = new UserRoutesHandler(USER_REPOSITORY, OAUTH_SERVICE);
+    const JWT_SERVICE = new JWTService(
+        process.env.JWT_PRIVATE_KEY_FILE || '',
+        process.env.JWT_PUBLIC_KEY_FILE || ''
+    );
+    const USER_HANDLER = new UserRoutesHandler(
+        USER_REPOSITORY,
+        OAUTH_SERVICE,
+        JWT_SERVICE
+    );
     await DATABASE.write(
         'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, publicId TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL)'
     );
@@ -34,6 +43,7 @@ const main = async () => {
     const PORT = process.env.PORT || 3000;
 
     APP.use(express.json());
+    APP.all('*', JWT_SERVICE.middleware);
     APP.use('/', ROOT_HANDLER.getRouter());
     APP.use('/api/v1/users', USER_HANDLER.getRouter());
 
