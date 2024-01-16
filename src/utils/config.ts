@@ -5,7 +5,7 @@ dotenv.config();
 const config = {
     port: Number.parseInt(process.env.PORT || '3000'),
     db: {
-        path: process.env.DB_PATH || ':memory:',
+        uri: process.env.DB_URI || ':memory:',
     },
     oauth: {
         google: {

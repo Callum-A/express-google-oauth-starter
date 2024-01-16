@@ -9,7 +9,7 @@ import JWTService from './services/jwt';
 
 const main = async () => {
     const ROOT_HANDLER = new RootHandler();
-    const DATABASE = new SqliteDBConnector(config.db.path);
+    const DATABASE = new SqliteDBConnector(config.db.uri);
     await DATABASE.connect();
     const USER_REPOSITORY = new UserRepository(DATABASE);
     const OAUTH_SERVICE = new OAuthService(
@@ -25,15 +25,6 @@ const main = async () => {
         USER_REPOSITORY,
         OAUTH_SERVICE,
         JWT_SERVICE
-    );
-    await DATABASE.write(
-        'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, publicId TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, authProvider TEXT NOT NULL)'
-    );
-    await DATABASE.write(
-        'CREATE UNIQUE INDEX IF NOT EXISTS publicIdIndex ON users (publicId)'
-    );
-    await DATABASE.write(
-        'CREATE UNIQUE INDEX IF NOT EXISTS emailIndex ON users (email)'
     );
 
     const APP: Express = express();

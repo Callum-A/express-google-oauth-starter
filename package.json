@@ -6,6 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon --exec ts-node src/index.ts",
+    "generate-oauth-url": "node scripts/generate-oauth-url.js",
+    "create-db": "npm run build && node scripts/create-db.js",
     "build": "tsc"
   },
   "author": "",
