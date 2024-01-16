@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No Tests!\"",
     "dev": "nodemon --exec ts-node src/index.ts",
     "generate-oauth-url": "node scripts/generate-oauth-url.js",
     "create-db": "npm run build && node scripts/create-db.js",
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint . --ext .ts"
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +27,9 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.11.3",
     "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
     "nodemon": "^3.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
