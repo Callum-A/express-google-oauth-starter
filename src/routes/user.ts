@@ -52,9 +52,11 @@ class UserRoutesHandler implements RouteHandler {
         if (!user) {
             user = await this.userRepository.createUser(
                 userDetails.name,
-                userDetails.email
+                userDetails.email,
+                'google'
             );
         }
+
         const accessToken = this.jwtService.sign(
             {
                 email: user.email,

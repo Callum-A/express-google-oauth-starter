@@ -1,5 +1,5 @@
 import DBConnector from '../database/base';
-import User from '../model/user';
+import User, { AuthProvider } from '../model/user';
 import { v4 as uuidv4 } from 'uuid';
 import BaseRepository from './base';
 
@@ -18,7 +18,13 @@ class UserRepository implements BaseRepository<User> {
             return null;
         }
 
-        return new User(user.id, user.publicId, user.name, user.email);
+        return new User(
+            user.id,
+            user.publicId,
+            user.name,
+            user.email,
+            user.authProvider
+        );
     }
 
     async findByPublicId(publicId: string): Promise<User | null> {
@@ -31,7 +37,13 @@ class UserRepository implements BaseRepository<User> {
             return null;
         }
 
-        return new User(user.id, user.publicId, user.name, user.email);
+        return new User(
+            user.id,
+            user.publicId,
+            user.name,
+            user.email,
+            user.authProvider
+        );
     }
 
     async findByEmail(emaiL: string): Promise<User | null> {
@@ -44,14 +56,24 @@ class UserRepository implements BaseRepository<User> {
             return null;
         }
 
-        return new User(user.id, user.publicId, user.name, user.email);
+        return new User(
+            user.id,
+            user.publicId,
+            user.name,
+            user.email,
+            user.authProvider
+        );
     }
 
-    async createUser(name: string, email: string): Promise<User> {
+    async createUser(
+        name: string,
+        email: string,
+        authProvider: AuthProvider
+    ): Promise<User> {
         const publicId = uuidv4();
         await this.db.write(
-            'INSERT INTO users (name, publicId, email) VALUES (?, ?, ?)',
-            [name, publicId, email]
+            'INSERT INTO users (name, publicId, email, authProvider) VALUES (?, ?, ?, ?)',
+            [name, publicId, email, authProvider]
         );
 
         const user = await this.findByPublicId(publicId);
